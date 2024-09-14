@@ -1,10 +1,19 @@
 package models;
 
+import jakarta.persistence.*;
+
 import java.util.Objects;
 
+@Entity(name = "student")
 public class Student {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Column(name = "name", length = 50)
     private String name;
+
+    @Column(name = "email", length = 50)
     private String email;
 
     public Student() {

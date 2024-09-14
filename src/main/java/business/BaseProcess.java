@@ -1,18 +1,17 @@
 package business;
 
 import data.ConnectDB;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import models.Student;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BaseProcess {
     private final List<Student> students;
-    private Connection con = null;
+    EntityManager em = ConnectDB.connect();
 
     public BaseProcess() {
         students = new ArrayList<>();
@@ -20,38 +19,23 @@ public class BaseProcess {
 
     public List<Student> getAll() {
         //TODO: Get all students from database
-        con = ConnectDB.connect();
-        List<Student> students = new ArrayList<>();
+        Query query = em.createQuery("SELECT s FROM student s");
 
-        String query = "SELECT * FROM student";
-        try {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                Student student = new Student();
-                student.setId(rs.getLong("id"));
-                student.setName(rs.getString("name"));
-                student.setEmail(rs.getString("email"));
-                students.add(student);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return students;
+        return (List<Student>) query.getResultList().stream().collect(Collectors.toList());
     }
 
     public Student getById(long id) {
-        for (Student student : students) {
-            if (student.getId() == id) {
-                return student;
-            }
-        }
-        return null;
+        Query query = em.createQuery("SELECT s FROM student s WHERE s.id = :id");
+
+        query.setParameter("id", id);
+        return (Student) query.getSingleResult();
     }
 
     public Student add(Student student) {
         students.add(student);
+        em.getTransaction().begin();
+        em.persist(student);
+        em.getTransaction().commit();
         return student;
     }
 }

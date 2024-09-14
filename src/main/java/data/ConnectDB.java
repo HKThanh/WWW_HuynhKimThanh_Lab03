@@ -1,28 +1,20 @@
 package data;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Persistence;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 
 public class ConnectDB {
     //Connect to maria database
-    public static Connection connect() {
-        Connection connection = null;
-        try {
-            Class.forName("org.mariadb.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mariadb://localhost:3306/test", "root", "root");
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return connection;
+    private static EntityManager em = null;
+
+    public static EntityManager connect() {
+        em = Persistence.createEntityManagerFactory("maria").createEntityManager();
+        return em;
     }
 
-    //Close connection
-    public static void close(Connection connection) {
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public static void close(Connection con) {
+        em.close();
     }
 }
